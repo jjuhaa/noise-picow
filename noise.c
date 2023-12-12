@@ -137,10 +137,8 @@ int main(){
         #ifdef USE_OLED
         //write oled
         memset(buf, 0, SSD1306_BUF_LEN);
-        memset(oled_text, 0, SSD1306_WIDTH);
-        snprintf(oled_text, SSD1306_WIDTH, "decibel");// %.0f", db_val);//
-        WriteString(buf, 0, 0, oled_text);
-
+        WriteString(buf, 0, 0, "decibel");
+        WriteString(buf, 8*8, 0, NODE_NAME NODE_NUMBER);
         memset(oled_text, 0, SSD1306_WIDTH);
         snprintf(oled_text, SSD1306_WIDTH, "%.0f", db_val);
         WriteStringSizeMult(buf, 20, 2*8, oled_text, 6);
@@ -149,6 +147,7 @@ int main(){
         #endif
 
         //check mqtt (+wifi) connection
+        cyw43_arch_lwip_begin();
         if (mqtt_client_is_connected(client) == 0) {
             printf("MQTT client not connected\n");
             if (cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA) != CYW43_LINK_JOIN) {
@@ -165,15 +164,18 @@ int main(){
             }
             mqtt_connect(client);
         }
+        cyw43_arch_lwip_end();
         
         //form mqtt message
         memset(payload_buf, 0, 30);
-        snprintf(payload_buf, 150, "{\"node\":\"%s\",\"dB\":\"%.1f\"}", NODE_NUMBER, db_val);
+        snprintf(payload_buf, 30, "{\"node\":\"%s\",\"dB\":\"%.1f\"}", NODE_NUMBER, db_val);
 
 	    printf("%s, vpp: %.4f\n", payload_buf, adc_vpp);
 
         //publish mqtt message
+        cyw43_arch_lwip_begin();
         err = mqtt_publish(client, MQTT_TOPIC_SEND, payload_buf, strlen(payload_buf), 0, 0, mqtt_pub_request_cb, NULL);
+        cyw43_arch_lwip_end();
         if (err != ERR_OK) {
             printf("Publish err: %d\n", err);
         }

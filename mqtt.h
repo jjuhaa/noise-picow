@@ -5,7 +5,7 @@
 
 #define WIFI_SSID           ""
 #define WIFI_PASS           ""
-#define NODE_NUMBER         "4"
+#define NODE_NUMBER         "1"
 #define NODE_NAME           "pico"
 #define MQTT_TOPIC_SEND     "noise"
 #define MQTT_TOPIC_RECEIVE  "led"
